@@ -3,96 +3,202 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>คำนวณค่าปรับและภาษีเชื้อเพลิง</title>
+<title>โปรแกรมคำนวณค่าปรับและภาษีเชื้อเพลิง</title>
 <style>
-  body {
-    font-family: "Prompt", sans-serif;
-    background: linear-gradient(135deg, #74b9ff, #a29bfe);
-    min-height: 100vh;
+  * {
+    box-sizing: border-box;
     margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: "Segoe UI", "Prompt", sans-serif;
+    background-color: #f5f7fa;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
   }
-  .container {
-    background: #fff;
-    padding: 30px 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    width: 400px;
-    text-align: center;
+
+  /* 🟦 พื้นหลังแพทเทิร์นโลโก้กรมสรรพสามิต 2 แบบสลับกัน */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      url("https://upload.wikimedia.org/wikipedia/commons/6/6c/Emblem_of_the_Excise_Department.svg"),
+      url("https://upload.wikimedia.org/wikipedia/commons/3/37/Logo_of_the_Excise_Department.svg");
+    background-repeat: repeat;
+    background-position: 0 0, 45px 45px;
+    background-size: 90px, 120px;
+    opacity: 0.08;
+    filter: grayscale(100%);
+    z-index: 0;
   }
-  h2 {
-    margin-bottom: 5px;
-    color: #2d3436;
-  }
-  .subtext {
-    font-size: 14px;
-    color: #636e72;
+
+  /* โลโก้หลักบนสุด */
+  .main-logo {
+    position: relative;
+    z-index: 2;
+    width: 120px;
+    height: auto;
     margin-bottom: 20px;
+    animation: fadeInDown 0.8s ease;
   }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* กล่องหลัก */
+  .card {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.96);
+    width: 430px;
+    padding: 40px 45px;
+    border-radius: 20px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+    transition: 0.3s ease;
+    animation: fadeIn 0.6s ease;
+    backdrop-filter: blur(4px);
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 45px rgba(0, 0, 0, 0.15);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  label {
+    display: block;
+    text-align: left;
+    color: #334155;
+    margin-top: 15px;
+    font-weight: 500;
+  }
+
   select, input {
     width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border: 1px solid #b2bec3;
-    font-size: 16px;
+    padding: 12px;
+    margin-top: 6px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-size: 15px;
+    transition: all 0.25s ease;
+    background: #f9fafb;
   }
+
+  select:focus, input:focus {
+    outline: none;
+    border-color: #2563eb;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
   button {
-    background: #0984e3;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 10px;
-    cursor: pointer;
     width: 100%;
-    font-size: 16px;
-    margin-top: 10px;
-    transition: 0.3s;
-  }
-  button:hover {
-    background: #74b9ff;
-  }
-  .result {
-    margin-top: 20px;
-    background: #dfe6e9;
-    padding: 15px;
+    margin-top: 25px;
+    padding: 13px;
+    background: #2563eb;
+    border: none;
     border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  button:hover {
+    background: #1d4ed8;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+  }
+
+  .result {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-top: 25px;
+    padding: 18px 20px;
     text-align: left;
+    color: #1e293b;
     line-height: 1.8em;
   }
+
   .result span {
-    font-weight: bold;
-    color: #2d3436;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  hr {
+    border: none;
+    height: 1px;
+    background: #e2e8f0;
+    margin: 10px 0;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 20px;
+    color: #94a3b8;
+    font-size: 13px;
   }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>🧾 โปรแกรมคำนวณค่าปรับและภาษี</h2>
-  <div class="subtext">สำนักงานสรรพสามิตพื้นที่สงขลา สาขาสะเดา</div>
-  
-  <label>ข้อหา:</label>
-  <select id="charge">
-    <option value="ขาย">ข้อหาขาย</option>
-    <option value="ครอบครอง">ข้อหาครอบครอง</option>
-  </select>
+  <!-- โลโก้หลักอยู่ตรงกลางบนสุด -->
+  <img class="main-logo" src="https://upload.wikimedia.org/wikipedia/commons/3/37/Logo_of_the_Excise_Department.svg" alt="โลโก้กรมสรรพสามิต">
 
-  <label>ชนิดเชื้อเพลิง:</label>
-  <select id="fuel">
-    <option value="เบนซิน">เบนซิน</option>
-    <option value="ดีเซล">ดีเซล</option>
-  </select>
+  <div class="card">
+    <div class="title">🧾 โปรแกรมคำนวณค่าปรับ</div>
+    <div class="subtitle">สำนักงานสรรพสามิตพื้นที่สงขลา สาขาสะเดา</div>
 
-  <label>จำนวนลิตร:</label>
-  <input type="number" id="liters" placeholder="กรอกจำนวนลิตร" min="0" step="any">
+    <label>ข้อหา:</label>
+    <select id="charge">
+      <option value="ขาย">ข้อหาขาย</option>
+      <option value="ครอบครอง">ข้อหาครอบครอง</option>
+    </select>
 
-  <button onclick="calculate()">คำนวณ</button>
+    <label>ชนิดเชื้อเพลิง:</label>
+    <select id="fuel">
+      <option value="เบนซิน">เบนซิน</option>
+      <option value="ดีเซล">ดีเซล</option>
+    </select>
 
-  <div class="result" id="output"></div>
-</div>
+    <label>จำนวนลิตร:</label>
+    <input type="number" id="liters" placeholder="กรอกจำนวนลิตร" min="0" step="any">
+
+    <button onclick="calculate()">คำนวณ</button>
+
+    <div class="result" id="output"></div>
+
+    <div class="footer">© สำนักงานสรรพสามิตพื้นที่สงขลา สาขาสะเดา</div>
+  </div>
 
 <script>
 function calculate() {
@@ -100,31 +206,34 @@ function calculate() {
   const fuel = document.getElementById('fuel').value;
   const liters = parseFloat(document.getElementById('liters').value);
   const output = document.getElementById('output');
-  
+
   if (isNaN(liters) || liters <= 0) {
-    output.innerHTML = "<span style='color:red'>กรุณากรอกจำนวนลิตรให้ถูกต้อง</span>";
+    output.innerHTML = "<span style='color:red'>⚠️ กรุณากรอกจำนวนลิตรให้ถูกต้อง</span>";
     return;
   }
 
-  // อัตราภาษีตามชนิดเชื้อเพลิง
   const rate = fuel === "เบนซิน" ? 7.5 : 7.44;
-  // ตัวคูณค่าปรับตามข้อหา
   const fineMultiplier = charge === "ขาย" ? 7 : 5;
 
-  // คำนวณโดยตัดเศษทศนิยมออก (ไม่ปัดขึ้น)
-  const fine = Math.floor(liters * fineMultiplier * rate);
-  const tax = Math.floor(liters * rate);
-  const adminTax = Math.floor(liters * rate * 0.1);
+  // ✅ คำนวณตามกฎ
+  const fineRaw = liters * fineMultiplier * rate;
+  const fine = Math.floor(fineRaw * 100) / 100; // 2 ตำแหน่งไม่ปัดขึ้น
+
+  const tax = Math.floor(liters * rate); // ภาษี (ตัดทศนิยมทั้งหมด)
+
+  const adminTaxRaw = liters * rate * 0.1;
+  const adminTax = Math.floor(adminTaxRaw * 100) / 100; // 2 ตำแหน่งไม่ปัดขึ้น
+
   const total = fine + tax + adminTax;
 
   output.innerHTML = `
     <span>ข้อหา:</span> ${charge}<br>
     <span>เชื้อเพลิง:</span> ${fuel}<br>
     <span>จำนวนลิตร:</span> ${liters.toLocaleString()} ลิตร<br><hr>
-    <span>ค่าปรับ:</span> ${fine.toLocaleString()} บาท<br>
+    <span>ค่าปรับ:</span> ${fine.toFixed(2).toLocaleString()} บาท<br>
     <span>ค่าภาษี:</span> ${tax.toLocaleString()} บาท<br>
-    <span>ค่าภาษีจ่ายปกครอง:</span> ${adminTax.toLocaleString()} บาท<br><hr>
-    <span>รวมที่ต้องชำระทั้งสิ้น:</span> ${total.toLocaleString()} บาท
+    <span>ค่าภาษีจ่ายปกครอง:</span> ${adminTax.toFixed(2).toLocaleString()} บาท<br><hr>
+    <span>รวมที่ต้องชำระทั้งสิ้น:</span> ${total.toFixed(2).toLocaleString()} บาท
   `;
 }
 </script>
